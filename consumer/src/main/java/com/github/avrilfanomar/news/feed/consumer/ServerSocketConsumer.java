@@ -12,16 +12,20 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 public class ServerSocketConsumer extends AbstractSocketConfig {
     private static final Logger LOGGER = Logger.getLogger(ServerSocketConsumer.class.getName());
 
     private final MessageProcessor messageProcessor;
+    private final ConcurrentHashMap<SelectionKey, ByteBuffer> channelBuffers = new ConcurrentHashMap<>();
+    private final int bufferSize;
 
     public ServerSocketConsumer(Properties properties, MessageProcessor messageProcessor) {
         super(properties);
         this.messageProcessor = messageProcessor;
+        this.bufferSize = Integer.parseInt(properties.getProperty("buffer.size"));
     }
 
     public void start() throws IOException, InterruptedException {
@@ -77,13 +81,14 @@ public class ServerSocketConsumer extends AbstractSocketConfig {
 
     private void readMessage(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        ByteBuffer buffer = channelBuffers.computeIfAbsent(key, addr -> ByteBuffer.allocate(bufferSize));
         final int numRead = channel.read(buffer);
         if (numRead == -1) {
-            LOGGER.info("Socket closed by " + channel.getRemoteAddress());
+            LOGGER.fine("Socket closed by " + channel.getRemoteAddress());
+            channelBuffers.remove(key);
             channel.close();
             key.cancel();
-        } else {
+        } else if (buffer.position() > 0) {
             messageProcessor.process(buffer);
         }
     }

@@ -4,5 +4,11 @@ import java.nio.ByteBuffer;
 
 public interface MessageProcessor {
 
+    /**
+     * Processes the message and clears the consumed part of the buffer afterward.
+     *
+     * @param buffer
+     *     the message
+     */
     void process(ByteBuffer buffer);
 }

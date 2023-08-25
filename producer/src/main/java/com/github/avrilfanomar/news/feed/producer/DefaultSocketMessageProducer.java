@@ -5,36 +5,41 @@ import com.github.avrilfanomar.news.feed.core.properties.AbstractSocketConfig;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class DefaultSocketMessageSender extends AbstractSocketConfig implements SocketMessageSender {
+public class DefaultSocketMessageProducer extends AbstractSocketConfig implements SocketMessageSender {
 
-    private static final Logger LOGGER = Logger.getLogger(DefaultSocketMessageSender.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DefaultSocketMessageProducer.class.getName());
 
     private final long sleepMilliseconds;
     private final MessageProducer messageProducer;
+    private final Charset charset;
 
 
-    public DefaultSocketMessageSender(Properties properties, MessageProducer messageProducer) {
+    public DefaultSocketMessageProducer(Properties properties, MessageProducer messageProducer) {
         super(properties);
         this.sleepMilliseconds = Long.parseLong(properties.getProperty("producer.sleep.milliseconds"));
         this.messageProducer = messageProducer;
+        this.charset = Charset.forName(properties.getProperty("charset"));
     }
 
     @SuppressWarnings("BusyWait")
     @Override
-    public Object call() throws Exception {
+    public Void call() throws Exception {
         InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
         LOGGER.info("Connecting to Server...");
         try (SocketChannel socketClient = SocketChannel.open(socketAddress)) {
             LOGGER.info("Socket connected successfully");
             for (;;) {
-                ByteBuffer buffer = ByteBuffer.wrap(messageProducer.produce().getBytes());
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+                ByteBuffer buffer = ByteBuffer.wrap(messageProducer.produce().getBytes(charset));
                 int written = socketClient.write(buffer);
-                buffer.clear();
-                if (written < 1) {
+                if (written < buffer.position()) {
                     LOGGER.warning("Message not sent, exiting");
                     break;
                 }
@@ -43,7 +48,6 @@ public class DefaultSocketMessageSender extends AbstractSocketConfig implements 
                 }
             }
         }
-        return 0;
+        return null;
     }
-
 }
