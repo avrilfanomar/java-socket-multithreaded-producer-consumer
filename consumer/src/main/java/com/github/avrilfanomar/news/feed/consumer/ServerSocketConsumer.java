@@ -82,14 +82,27 @@ public class ServerSocketConsumer extends AbstractSocketConfig {
     private void readMessage(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = channelBuffers.computeIfAbsent(key, addr -> ByteBuffer.allocate(bufferSize));
-        final int numRead = channel.read(buffer);
+        int numRead = -1;
+        try {
+            numRead = channel.read(buffer);
+        } catch (IOException e) {
+            LOGGER.warning("Failed to read from " + channel.getRemoteAddress());
+        }
         if (numRead == -1) {
-            LOGGER.fine("Socket closed by " + channel.getRemoteAddress());
-            channelBuffers.remove(key);
-            channel.close();
-            key.cancel();
+            closeChannel(key, channel);
         } else if (buffer.position() > 0) {
             messageProcessor.process(buffer);
         }
+    }
+
+    private void closeChannel(SelectionKey key, SocketChannel channel) throws IOException {
+        LOGGER.fine("Socket closed by " + channel.getRemoteAddress());
+        channelBuffers.remove(key);
+        try {
+            channel.close();
+        } catch (IOException e) {
+            LOGGER.severe("Failed to close channel " + channel.getRemoteAddress());
+        }
+        key.cancel();
     }
 }
