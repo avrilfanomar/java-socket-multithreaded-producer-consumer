@@ -37,7 +37,7 @@ public class DefaultSocketMessageProducer extends AbstractSocketConfig implement
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
-                ByteBuffer buffer = ByteBuffer.wrap(messageProducer.produce().getBytes(charset));
+                ByteBuffer buffer = ByteBuffer.wrap(messageProducer.generate().getBytes(charset));
                 int written = socketClient.write(buffer);
                 if (written < buffer.position()) {
                     LOGGER.warning("Message not sent, exiting");

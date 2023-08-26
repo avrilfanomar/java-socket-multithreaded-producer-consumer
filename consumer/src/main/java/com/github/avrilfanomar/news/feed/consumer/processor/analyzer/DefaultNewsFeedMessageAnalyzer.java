@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DefaultHeadlineCollector implements HeadlineCollector {
+public class DefaultNewsFeedMessageAnalyzer implements NewsFeedMessageAnalyzer {
 
-    private static final Logger LOGGER = Logger.getLogger(DefaultHeadlineCollector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DefaultNewsFeedMessageAnalyzer.class.getName());
 
     private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
@@ -24,7 +24,7 @@ public class DefaultHeadlineCollector implements HeadlineCollector {
     private final AtomicLong negativeHeadlinesCount = new AtomicLong();
     private final SynchronizedPriorityLimitedCollection<Message> topHeadlines;
 
-    public DefaultHeadlineCollector(Properties properties) {
+    public DefaultNewsFeedMessageAnalyzer(Properties properties) {
         this.positiveWords = Stream.of(properties.getProperty("words.positive").split(",")).collect(Collectors.toSet());
         short topElementCount = Short.parseShort(properties.getProperty("top.headlines.count"));
         this.topHeadlines = new SynchronizedPriorityLimitedCollection<>(topElementCount);

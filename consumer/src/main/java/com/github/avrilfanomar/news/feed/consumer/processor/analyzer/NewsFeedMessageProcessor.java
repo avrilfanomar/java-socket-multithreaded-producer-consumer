@@ -9,19 +9,19 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-public class FeedHeadlineAnalyzer implements MessageProcessor {
+public class NewsFeedMessageProcessor implements MessageProcessor {
 
-    private static final Logger LOGGER = Logger.getLogger(FeedHeadlineAnalyzer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(NewsFeedMessageProcessor.class.getName());
 
     private static final Pattern EOM_PATTERN = Pattern.compile(Message.EOM);
 
 
-    private final HeadlineCollector headlineCollector;
+    private final NewsFeedMessageAnalyzer newsFeedMessageAnalyzer;
     private final Charset charset;
 
 
-    public FeedHeadlineAnalyzer(Properties properties, HeadlineCollector headlineCollector) {
-        this.headlineCollector = headlineCollector;
+    public NewsFeedMessageProcessor(Properties properties, NewsFeedMessageAnalyzer newsFeedMessageAnalyzer) {
+        this.newsFeedMessageAnalyzer = newsFeedMessageAnalyzer;
         this.charset = Charset.forName(properties.getProperty("charset"));
     }
 
@@ -45,7 +45,7 @@ public class FeedHeadlineAnalyzer implements MessageProcessor {
     private void processMessage(String encodedMessage) {
         try {
             Message message = Message.parseMessage(encodedMessage);
-            headlineCollector.submit(message);
+            newsFeedMessageAnalyzer.submit(message);
         } catch (RuntimeException e) {
             LOGGER.warning("Failed to process message: " + encodedMessage);
         }

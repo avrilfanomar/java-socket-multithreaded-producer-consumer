@@ -1,7 +1,7 @@
 package com.github.avrilfanomar.news.feed.consumer;
 
-import com.github.avrilfanomar.news.feed.consumer.processor.analyzer.DefaultHeadlineCollector;
-import com.github.avrilfanomar.news.feed.consumer.processor.analyzer.FeedHeadlineAnalyzer;
+import com.github.avrilfanomar.news.feed.consumer.processor.analyzer.DefaultNewsFeedMessageAnalyzer;
+import com.github.avrilfanomar.news.feed.consumer.processor.analyzer.NewsFeedMessageProcessor;
 import com.github.avrilfanomar.news.feed.core.properties.PropertiesUtils;
 
 import java.io.IOException;
@@ -18,10 +18,10 @@ public class ConsumerMain {
         try {
             Properties properties = PropertiesUtils.loadProperties(ConsumerMain.class.getClassLoader());
 
-            DefaultHeadlineCollector headlineCollector = new DefaultHeadlineCollector(properties);
+            DefaultNewsFeedMessageAnalyzer headlineCollector = new DefaultNewsFeedMessageAnalyzer(properties);
             scheduler.scheduleAtFixedRate(headlineCollector::printTopHeadlines, 10, 10, TimeUnit.SECONDS);
 
-            FeedHeadlineAnalyzer analyzer = new FeedHeadlineAnalyzer(properties, headlineCollector);
+            NewsFeedMessageProcessor analyzer = new NewsFeedMessageProcessor(properties, headlineCollector);
             ServerSocketConsumer consumer = new ServerSocketConsumer(properties, analyzer);
             consumer.start();
         } finally {

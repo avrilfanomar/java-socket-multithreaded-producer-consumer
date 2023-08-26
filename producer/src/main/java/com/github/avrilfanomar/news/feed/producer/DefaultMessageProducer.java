@@ -36,7 +36,7 @@ public class DefaultMessageProducer implements MessageProducer {
     }
 
     @Override
-    public String produce() {
+    public String generate() {
         final Message message = new Message(generateNextHeadline(), generateNextPriority());
         return message.encode();
     }
