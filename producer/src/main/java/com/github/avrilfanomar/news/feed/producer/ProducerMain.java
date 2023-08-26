@@ -1,6 +1,8 @@
 package com.github.avrilfanomar.news.feed.producer;
 
 import com.github.avrilfanomar.news.feed.core.properties.PropertiesUtils;
+import com.github.avrilfanomar.news.feed.producer.socket.DefaultSocketMessageProducer;
+import com.github.avrilfanomar.news.feed.producer.socket.SocketMessageSender;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

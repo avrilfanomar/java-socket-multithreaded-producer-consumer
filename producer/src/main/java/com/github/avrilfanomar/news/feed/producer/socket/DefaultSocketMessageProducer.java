@@ -1,6 +1,7 @@
-package com.github.avrilfanomar.news.feed.producer;
+package com.github.avrilfanomar.news.feed.producer.socket;
 
 import com.github.avrilfanomar.news.feed.core.properties.AbstractSocketConfig;
+import com.github.avrilfanomar.news.feed.producer.MessageProducer;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

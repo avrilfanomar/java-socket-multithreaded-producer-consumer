@@ -1,6 +1,6 @@
 package com.github.avrilfanomar.news.feed.producer;
 
-import com.github.avrilfanomar.news.feed.core.message.Message;
+import com.github.avrilfanomar.news.feed.core.domain.Message;
 
 import java.util.HashMap;
 import java.util.List;

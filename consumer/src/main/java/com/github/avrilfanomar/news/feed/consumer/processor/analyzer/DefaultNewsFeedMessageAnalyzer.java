@@ -1,7 +1,7 @@
 package com.github.avrilfanomar.news.feed.consumer.processor.analyzer;
 
 import com.github.avrilfanomar.news.feed.consumer.SynchronizedPriorityLimitedCollection;
-import com.github.avrilfanomar.news.feed.core.message.Message;
+import com.github.avrilfanomar.news.feed.core.domain.Message;
 
 import java.util.Collection;
 import java.util.HashSet;

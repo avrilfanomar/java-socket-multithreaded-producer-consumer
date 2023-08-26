@@ -1,4 +1,4 @@
-package com.github.avrilfanomar.news.feed.producer;
+package com.github.avrilfanomar.news.feed.producer.socket;
 
 import java.util.concurrent.Callable;
 

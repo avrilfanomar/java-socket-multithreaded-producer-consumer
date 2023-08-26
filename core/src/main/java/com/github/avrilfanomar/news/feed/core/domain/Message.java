@@ -1,4 +1,4 @@
-package com.github.avrilfanomar.news.feed.core.message;
+package com.github.avrilfanomar.news.feed.core.domain;
 
 import com.github.avrilfanomar.news.feed.core.Prioritized;
 
