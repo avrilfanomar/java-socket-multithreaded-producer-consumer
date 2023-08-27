@@ -8,12 +8,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public class ProducerMain {
@@ -28,21 +26,15 @@ public class ProducerMain {
     }
 
     private static void runThreadsAndWaitForThem(Properties properties) throws InterruptedException {
-        short threadQuantity = Short.parseShort(properties.getProperty("producer.threads"));
+        short threadQuantity = Short.parseShort(properties.getProperty("producer.threads.count"));
         LOGGER.info("Starting " + threadQuantity + " threads");
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadQuantity);
-        final List<Future<Void>> futures = executorService.invokeAll(buildProducers(threadQuantity, properties));
-
-        //wait for threads
-        for (Future<Void> future : futures) {
-            try {
-                future.get();
-            } catch (Exception e) {
-                LOGGER.severe("Exception while waiting for thread to finish: " + e.getMessage());
-            }
+        try {
+            executorService.invokeAll(buildProducers(threadQuantity, properties));
+        } finally {
+            executorService.shutdown();
         }
-        executorService.shutdown();
     }
 
     private static Collection<? extends Callable<Void>> buildProducers(int threadNumber, Properties properties) {

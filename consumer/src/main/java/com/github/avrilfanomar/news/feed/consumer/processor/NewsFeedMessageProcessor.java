@@ -1,6 +1,6 @@
-package com.github.avrilfanomar.news.feed.consumer.processor.analyzer;
+package com.github.avrilfanomar.news.feed.consumer.processor;
 
-import com.github.avrilfanomar.news.feed.consumer.processor.MessageProcessor;
+import com.github.avrilfanomar.news.feed.consumer.processor.analyzer.NewsFeedMessageAnalyzer;
 import com.github.avrilfanomar.news.feed.core.domain.Message;
 
 import java.nio.ByteBuffer;
@@ -42,7 +42,7 @@ public class NewsFeedMessageProcessor implements MessageProcessor {
         }
     }
 
-    private void processMessage(String encodedMessage) {
+    protected void processMessage(String encodedMessage) {
         try {
             Message message = Message.parseMessage(encodedMessage);
             newsFeedMessageAnalyzer.submit(message);

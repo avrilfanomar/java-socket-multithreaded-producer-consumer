@@ -32,7 +32,7 @@ public class DefaultNewsFeedMessageAnalyzer implements NewsFeedMessageAnalyzer {
 
     @Override
     public void submit(Message message) {
-        if (isPositive(message)) {
+        if (isPositive(message.getHeadline())) {
             positiveHeadlinesCount.incrementAndGet();
             topHeadlines.offer(message);
         } else {
@@ -49,8 +49,8 @@ public class DefaultNewsFeedMessageAnalyzer implements NewsFeedMessageAnalyzer {
         LOGGER.info("Total negative headlines: " + negativeHeadlinesCount.getAndSet(0));
     }
 
-    private boolean isPositive(Message message) {
-        Collection<String> messageWords = SPACE_PATTERN.splitAsStream(message.getHeadline()).collect(Collectors.toCollection(HashSet::new));
+    private boolean isPositive(String headline) {
+        Collection<String> messageWords = SPACE_PATTERN.splitAsStream(headline).collect(Collectors.toCollection(HashSet::new));
         final int minPositiveWords = messageWords.size() / 2 + 1;
         messageWords.retainAll(positiveWords);
         return messageWords.size() >= minPositiveWords;
