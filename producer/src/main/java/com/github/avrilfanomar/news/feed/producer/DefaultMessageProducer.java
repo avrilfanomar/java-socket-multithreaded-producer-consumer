@@ -16,7 +16,7 @@ public class DefaultMessageProducer implements MessageProducer {
     private final short minWords;
     private final short maxWords;
     private final short minPriority;
-    private final int randomBase;
+    private final int priorityRandomBase;
     private final Random random = new Random();
     private final Map<Short, Integer> priorityThresholdsMap = new HashMap<>();
 
@@ -26,12 +26,12 @@ public class DefaultMessageProducer implements MessageProducer {
         this.maxWords = Short.parseShort(properties.getProperty("words.quantity.max"));
         this.minPriority = Short.parseShort(properties.getProperty("priority.min"));
         short maxPriority = Short.parseShort(properties.getProperty("priority.max"));
-        short priorityFactor = Short.parseShort(properties.getProperty("priority.factor"));
-        this.randomBase = (int) Math.pow(priorityFactor, maxPriority - minPriority + 1);
-        int base = randomBase;
+        short priorityGenerationFactor = Short.parseShort(properties.getProperty("priority.generation.factor"));
+        this.priorityRandomBase = (int) Math.pow(priorityGenerationFactor, maxPriority - minPriority + 1);
+        int base = priorityRandomBase;
         for (short priority = minPriority; priority <= maxPriority - minPriority; priority++) {
-            priorityThresholdsMap.put(priority, base - (int) Math.pow(priorityFactor, maxPriority - priority));
-            base /= priorityFactor;
+            priorityThresholdsMap.put(priority, base - (int) Math.pow(priorityGenerationFactor, maxPriority - priority));
+            base /= priorityGenerationFactor;
         }
     }
 
@@ -47,7 +47,7 @@ public class DefaultMessageProducer implements MessageProducer {
     }
 
     private short generateNextPriority() {
-        int randomInt = random.nextInt(randomBase);
+        int randomInt = random.nextInt(priorityRandomBase);
         short priority = minPriority;
         while (true) {
             int threshold = priorityThresholdsMap.get(priority);
