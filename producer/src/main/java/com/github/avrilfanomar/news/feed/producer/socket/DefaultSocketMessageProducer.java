@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class DefaultSocketMessageProducer extends AbstractSocketConfig implements SocketMessageSender {
@@ -17,13 +18,17 @@ public class DefaultSocketMessageProducer extends AbstractSocketConfig implement
     private final long sleepMilliseconds;
     private final MessageProducer messageProducer;
     private final Charset charset;
+    private final AtomicLong counter;
+    private final long counterThreshold;
 
 
-    public DefaultSocketMessageProducer(Properties properties, MessageProducer messageProducer) {
+    public DefaultSocketMessageProducer(Properties properties, MessageProducer messageProducer, AtomicLong counter) {
         super(properties);
         this.sleepMilliseconds = Long.parseLong(properties.getProperty("producer.sleep.milliseconds"));
+        this.counterThreshold = Long.parseLong(properties.getProperty("producer.frequency.per.second"));
         this.messageProducer = messageProducer;
         this.charset = Charset.forName(properties.getProperty("charset"));
+        this.counter = counter;
     }
 
     @SuppressWarnings("BusyWait")
@@ -38,14 +43,20 @@ public class DefaultSocketMessageProducer extends AbstractSocketConfig implement
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
-                ByteBuffer buffer = ByteBuffer.wrap(messageProducer.generate().getBytes(charset));
-                int written = socketClient.write(buffer);
-                if (written < buffer.position()) {
-                    LOGGER.warning("Message not sent, exiting");
-                    break;
-                }
-                if (sleepMilliseconds > 0) {
-                    Thread.sleep(sleepMilliseconds);
+                if (counter.incrementAndGet() <= counterThreshold) {
+                    ByteBuffer buffer = ByteBuffer.wrap(messageProducer.generate().getBytes(charset));
+                    int written = socketClient.write(buffer);
+                    if (written < buffer.position()) {
+                        LOGGER.warning("Message not sent, exiting");
+                        break;
+                    }
+                } else {
+                    counter.decrementAndGet();
+                    if (sleepMilliseconds > 0) {
+                        Thread.sleep(sleepMilliseconds);
+                    } else {
+                        Thread.yield();
+                    }
                 }
             }
         }
