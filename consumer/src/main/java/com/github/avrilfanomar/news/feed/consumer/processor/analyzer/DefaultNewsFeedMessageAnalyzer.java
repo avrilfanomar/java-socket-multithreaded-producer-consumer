@@ -3,8 +3,8 @@ package com.github.avrilfanomar.news.feed.consumer.processor.analyzer;
 import com.github.avrilfanomar.news.feed.consumer.SynchronizedPriorityLimitedCollection;
 import com.github.avrilfanomar.news.feed.core.domain.Message;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,8 +50,8 @@ public class DefaultNewsFeedMessageAnalyzer implements NewsFeedMessageAnalyzer {
     }
 
     private boolean isPositive(String headline) {
-        Collection<String> messageWords = SPACE_PATTERN.splitAsStream(headline).collect(Collectors.toCollection(HashSet::new));
-        final int minPositiveWords = messageWords.size() / 2 + 1;
+        Collection<String> messageWords = SPACE_PATTERN.splitAsStream(headline).collect(Collectors.toCollection(ArrayList::new));
+        int minPositiveWords = messageWords.size() / 2 + 1;
         messageWords.retainAll(positiveWords);
         return messageWords.size() >= minPositiveWords;
     }
