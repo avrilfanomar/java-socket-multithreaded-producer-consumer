@@ -29,7 +29,7 @@ public class DefaultMessageProducer implements MessageProducer {
         short priorityGenerationFactor = Short.parseShort(properties.getProperty("priority.generation.factor"));
         this.priorityRandomBase = (int) Math.pow(priorityGenerationFactor, maxPriority - minPriority + 1);
         int base = priorityRandomBase;
-        for (short priority = minPriority; priority <= maxPriority - minPriority; priority++) {
+        for (short priority = minPriority; priority <= maxPriority; priority++) {
             priorityThresholdsMap.put(priority, base - (int) Math.pow(priorityGenerationFactor, maxPriority - priority));
             base /= priorityGenerationFactor;
         }
