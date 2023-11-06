@@ -15,7 +15,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-public class ServerSocketConsumer extends AbstractSocketConfig {
+public class ServerSocketConsumer extends AbstractSocketConfig implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ServerSocketConsumer.class.getName());
 
     private final MessageProcessor messageProcessor;
@@ -37,6 +37,11 @@ public class ServerSocketConsumer extends AbstractSocketConfig {
                 acceptMessages(selector, serverChannel);
             }
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        messageProcessor.close();
     }
 
     @SuppressWarnings("InfiniteLoopStatement")

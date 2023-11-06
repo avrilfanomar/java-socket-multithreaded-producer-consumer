@@ -42,6 +42,11 @@ public class NewsFeedMessageProcessor implements MessageProcessor {
         }
     }
 
+    @Override
+    public void close() {
+        //do nothing
+    }
+
     protected void processMessage(String encodedMessage) {
         try {
             Message message = Message.parseMessage(encodedMessage);

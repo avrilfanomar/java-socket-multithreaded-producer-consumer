@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
@@ -22,34 +20,28 @@ public class ProducerMain {
     private static final Logger LOGGER = Logger.getLogger(ProducerMain.class.getName());
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
-        Properties properties = PropertiesUtils.loadProperties(ProducerMain.class.getClassLoader());
+        var properties = PropertiesUtils.loadProperties(ProducerMain.class.getClassLoader());
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        try {
-            final ProducedMessageCountRefresher countRefresher = new ProducedMessageCountRefresher(properties);
+        var countRefresher = new ProducedMessageCountRefresher(properties);
+        try (var scheduler = Executors.newScheduledThreadPool(1)) {
             scheduler.scheduleAtFixedRate(countRefresher, 1, 1, TimeUnit.SECONDS);
             runProducerThreadsAndWaitForThem(properties, countRefresher.getCounter());
-            LOGGER.info("All threads finished");
-        } finally {
-            scheduler.shutdown();
         }
+        LOGGER.info("All threads finished");
     }
 
     private static void runProducerThreadsAndWaitForThem(Properties properties, AtomicLong counter)
         throws InterruptedException {
-        short threadQuantity = Short.parseShort(properties.getProperty("producer.threads.count"));
+        var threadQuantity = Short.parseShort(properties.getProperty("producer.threads.count"));
         LOGGER.info("Starting " + threadQuantity + " threads");
 
-        ExecutorService executorService = Executors.newFixedThreadPool(threadQuantity);
-        try {
+        try (var executorService = Executors.newFixedThreadPool(threadQuantity)) {
             executorService.invokeAll(buildProducers(threadQuantity, properties, counter));
-        } finally {
-            executorService.shutdown();
         }
     }
 
     private static Collection<? extends Callable<Void>> buildProducers(int threadNumber, Properties properties, AtomicLong counter) {
-        Collection<SocketMessageSender> producers = new ArrayList<>();
+        var producers = new ArrayList<SocketMessageSender>();
         for (int i = 0; i < threadNumber; i++) {
             producers.add(new DefaultSocketMessageProducer(properties, new DefaultMessageProducer(properties), counter));
         }
